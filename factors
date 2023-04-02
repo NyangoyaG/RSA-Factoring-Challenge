@@ -1,48 +1,35 @@
 #!/usr/bin/env bash
 #is a challenge
-check_factor()
-{
-	if [ $# -ne 3 ];
-        then
-                args=("$@")
-                count=0
-                num2=1
-                for a in ${args[*]};
-                do
-                        if [ $count -gt 1 ];
-                        then
-                                num2=$(echo $a*$num2 | bc)
-                        fi
-                        count=$((count + 1))
-                done
-        else
-                num2=$3
-        fi
+def factorize(num):
+    """Factorizes the given number into two smaller numbers."""
+    for i in range(2, int(num**0.5)+1):
+        if num % i == 0:
+            return (i, num//i)
+    return None
 
-        num1=$2
-        num=$(echo "$1" | tr ':' '=')
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("Usage: factors <file>")
+        sys.exit(1)
 
-        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
-	        if ((result == 1)); then
-		        numcp=$num1
-		        num1=$num2
-		        num2=$numcp
-                fi
+    filename = sys.argv[1]
 
-        echo "$num$num1*$num2"
-}
+    try:
+        with open(filename) as file:
+            for line in file:
+                num = int(line.strip())
+                start = time.time()
+                factors = factorize(num)
+                end = time.time()
 
-if [ $# -ne 1 ]
-then
-        echo 'Usage: rsa <file>'
-        exit 1
-else
+                if factors:
+                    print(f"{num}={factors[0]}*{factors[1]}")
+                else:
+                    print(f"{num} is a prime number.")
 
-        while read i
-        do
+                # Print elapsed time for each factorization
+                print(f"Elapsed time: {end-start:.6f} seconds.\n")
 
-                result=$(factor "$i")
-                check_factor $result
-
-        done < "$1"
-fi
+    except FileNotFoundError:
+        print(f"{filename} not found.")
+        sys.exit(1)
